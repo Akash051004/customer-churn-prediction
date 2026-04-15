@@ -7,15 +7,15 @@ warnings.filterwarnings('ignore')
 np.random.seed(42)
 
 df = pd.read_csv('data/churn_data.csv')
-
+'''
 print('Shape:', df.shape)
 print(df.head(5))
 print('\nColumn names:')
 print(df.columns.tolist())
-
+'''
 print('\nData info:')
 df.info()
-
+'''
 print('\nNumerical summary:')
 print(df.describe())
 
@@ -25,7 +25,7 @@ print(df.isnull().sum())
 print('\nChurn distribution:')
 print(df['Churn'].value_counts())
 print('Churn rate:', df['Churn'].value_counts(normalize=True).round(3))
-
+'''
 
 print('TotalCharges dtype:', df['TotalCharges'].dtype)
 df['TotalCharges'] = df['TotalCharges'].replace(' ', np.nan)
@@ -36,6 +36,8 @@ print('Missing values in TotalCharges after filling:',
       df['TotalCharges'].isnull().sum())
 df.drop('customerID', axis=1, inplace=True)
 df['Churn'] = df['Churn'].map({'Yes': 1, 'No': 0})
+
+'''
 print('\nData types after cleaning:')
 print(df.dtypes)
 print('\nMissing values after cleaning:')
@@ -98,3 +100,37 @@ plt.ylabel('Monthly Charges ($)')
 plt.tight_layout()
 plt.savefig('plots/monthly_charges_boxplot.png', dpi=150)
 plt.show()
+'''
+
+categorical_cols = df.select_dtypes(include='object').columns.tolist()
+numerical_cols = df.select_dtypes(include=[np.number]).columns.tolist()
+numerical_cols.remove('Churn')
+
+'''
+print('Categorical columns:', categorical_cols)
+print('Numerical columns:', numerical_cols)
+
+for col in categorical_cols:
+    print(f'{col}: {df[col].unique()}')
+'''
+
+binary_cols = ['gender', 'Partner', 'Dependents', 'PhoneService',
+               'PaperlessBilling', 'MultipleLines',
+               'OnlineSecurity', 'OnlineBackup', 'DeviceProtection',
+               'TechSupport', 'StreamingTV', 'StreamingMovies']
+
+binary_map = {'Yes': 1, 'No': 0, 'Female': 1, 'Male': 0,
+              'No phone service': 0, 'No internet service': 0}
+for col in binary_cols:
+    df[col] = df[col].map(binary_map)
+
+multi_class_cols = ['InternetService', 'Contract', 'PaymentMethod']
+df = pd.get_dummies(df, columns=multi_class_cols, drop_first=True)
+df['avg_monthly_spend'] = df['TotalCharges'] / (df['tenure'] + 1)
+df['is_new_customer'] = (df['tenure'] <= 12).astype(int)
+service_cols = ['PhoneService', 'OnlineSecurity', 'OnlineBackup',
+                'DeviceProtection', 'TechSupport', 'StreamingTV', 'StreamingMovies']
+df['num_services'] = df[service_cols].sum(axis=1)
+
+print('\nFinal dataset shape:', df.shape)
+print('New features created: avg_monthly_spend, is_new_customer, num_services')
