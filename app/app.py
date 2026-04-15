@@ -1,3 +1,6 @@
+from imblearn.over_sampling import SMOTE
+from sklearn.preprocessing import StandardScaler
+from sklearn.model_selection import train_test_split
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
@@ -13,8 +16,10 @@ print(df.head(5))
 print('\nColumn names:')
 print(df.columns.tolist())
 '''
+'''
 print('\nData info:')
 df.info()
+'''
 '''
 print('\nNumerical summary:')
 print(df.describe())
@@ -27,13 +32,9 @@ print(df['Churn'].value_counts())
 print('Churn rate:', df['Churn'].value_counts(normalize=True).round(3))
 '''
 
-print('TotalCharges dtype:', df['TotalCharges'].dtype)
 df['TotalCharges'] = df['TotalCharges'].replace(' ', np.nan)
 df['TotalCharges'] = pd.to_numeric(df['TotalCharges'], errors='coerce')
-print('Missing values in TotalCharges:', df['TotalCharges'].isnull().sum())
 df['TotalCharges'] = df['TotalCharges'].fillna(df['TotalCharges'].median())
-print('Missing values in TotalCharges after filling:',
-      df['TotalCharges'].isnull().sum())
 df.drop('customerID', axis=1, inplace=True)
 df['Churn'] = df['Churn'].map({'Yes': 1, 'No': 0})
 
@@ -131,6 +132,38 @@ df['is_new_customer'] = (df['tenure'] <= 12).astype(int)
 service_cols = ['PhoneService', 'OnlineSecurity', 'OnlineBackup',
                 'DeviceProtection', 'TechSupport', 'StreamingTV', 'StreamingMovies']
 df['num_services'] = df[service_cols].sum(axis=1)
-
+'''
 print('\nFinal dataset shape:', df.shape)
 print('New features created: avg_monthly_spend, is_new_customer, num_services')
+'''
+
+X = df.drop('Churn', axis=1)
+y = df['Churn']
+'''
+print('Features shape:', X.shape)
+print('Target shape:',  y.shape)
+print('Class distribution:', y.value_counts().to_dict())
+'''
+
+X_train, X_test, y_train, y_test = train_test_split(
+    X, y,
+    test_size=0.2,
+    random_state=42,
+    stratify=y
+)
+'''
+print(f'Training: {X_train.shape[0]} samples')
+print(f'Testing:  {X_test.shape[0]} samples')
+'''
+scaler = StandardScaler()
+scale_cols = ['tenure', 'MonthlyCharges',
+              'TotalCharges', 'avg_monthly_spend', 'num_services']
+X_train[scale_cols] = scaler.fit_transform(X_train[scale_cols])
+X_test[scale_cols] = scaler.transform(X_test[scale_cols])
+smote = SMOTE(random_state=42, k_neighbors=5)
+X_train_sm, y_train_sm = smote.fit_resample(X_train, y_train)
+
+print(f'\nAfter SMOTE:')
+print(f'Training samples: {X_train_sm.shape[0]}')
+print(
+    f'Class distribution: {dict(zip(*np.unique(y_train_sm, return_counts=True)))}')
