@@ -1,3 +1,13 @@
+from sklearn.metrics import precision_recall_curve
+from imblearn.combine import SMOTEENN
+import time
+
+from sklearn.metrics import (accuracy_score, precision_score, recall_score,
+                             f1_score, roc_auc_score, classification_report, confusion_matrix,
+                             ConfusionMatrixDisplay)
+from xgboost import XGBClassifier
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.linear_model import LogisticRegression
 from imblearn.over_sampling import SMOTE
 from sklearn.preprocessing import StandardScaler
 from sklearn.model_selection import train_test_split
@@ -132,6 +142,9 @@ df['is_new_customer'] = (df['tenure'] <= 12).astype(int)
 service_cols = ['PhoneService', 'OnlineSecurity', 'OnlineBackup',
                 'DeviceProtection', 'TechSupport', 'StreamingTV', 'StreamingMovies']
 df['num_services'] = df[service_cols].sum(axis=1)
+df['tenure_monthly_ratio'] = df['tenure'] / (df['MonthlyCharges'] + 1)
+df['high_spender'] = (df['MonthlyCharges'] >
+                      df['MonthlyCharges'].quantile(0.75)).astype(int)
 '''
 print('\nFinal dataset shape:', df.shape)
 print('New features created: avg_monthly_spend, is_new_customer, num_services')
@@ -160,10 +173,97 @@ scale_cols = ['tenure', 'MonthlyCharges',
               'TotalCharges', 'avg_monthly_spend', 'num_services']
 X_train[scale_cols] = scaler.fit_transform(X_train[scale_cols])
 X_test[scale_cols] = scaler.transform(X_test[scale_cols])
-smote = SMOTE(random_state=42, k_neighbors=5)
-X_train_sm, y_train_sm = smote.fit_resample(X_train, y_train)
+# ADD THIS
 
+smote = SMOTEENN(random_state=42)
+X_train_sm, y_train_sm = smote.fit_resample(X_train, y_train)
+'''
 print(f'\nAfter SMOTE:')
 print(f'Training samples: {X_train_sm.shape[0]}')
 print(
     f'Class distribution: {dict(zip(*np.unique(y_train_sm, return_counts=True)))}')
+'''
+
+models = {
+    'Logistic Regression': LogisticRegression(
+        max_iter=3000,
+        C=0.1,
+        solver='saga',
+        penalty='elasticnet',
+        l1_ratio=0.5,
+        tol=1e-5,
+        random_state=42
+    ),
+
+    'Random Forest': RandomForestClassifier(
+        n_estimators=500,
+        max_depth=12,
+        min_samples_leaf=4,
+        min_samples_split=10,
+        max_features='sqrt',
+        bootstrap=True,
+        oob_score=True,
+        random_state=42,
+        n_jobs=-1
+    ),
+
+    'XGBoost': XGBClassifier(
+        n_estimators=700,
+        max_depth=5,
+        learning_rate=0.02,
+        subsample=0.8,
+        colsample_bytree=0.7,
+        colsample_bylevel=0.7,
+        gamma=0.3,
+        reg_alpha=0.5,
+        reg_lambda=2.0,
+        min_child_weight=5,
+        random_state=42,
+        eval_metric='logloss',
+        use_label_encoder=False,
+        n_jobs=-1
+    )
+}
+results = {}
+
+for name, model in models.items():
+    start = time.time()
+    model.fit(X_train_sm, y_train_sm)
+
+    y_pred = model.predict(X_test)
+    y_proba = model.predict_proba(X_test)[:, 1]
+
+    elapsed = round(time.time() - start, 2)
+
+    results[name] = {
+        'Accuracy':  accuracy_score(y_test, y_pred),
+        'Precision': precision_score(y_test, y_pred),
+        'Recall':    recall_score(y_test, y_pred),
+        'F1 Score':  f1_score(y_test, y_pred),
+        'AUC-ROC':   roc_auc_score(y_test, y_proba),
+        'Train Time (s)': elapsed
+    }
+
+    print(f'\n--- {name} ---')
+    print(classification_report(y_test, y_pred))
+
+results_df = pd.DataFrame(results).T.round(4)
+print('\n=== MODEL COMPARISON ===')
+print(results_df.to_string())
+
+print('\n=== THRESHOLD TUNED RESULTS ===')
+for name, model in models.items():
+    y_proba = model.predict_proba(X_test)[:, 1]
+
+    precisions, recalls, thresholds = precision_recall_curve(y_test, y_proba)
+    f1_scores = 2 * (precisions * recalls) / (precisions + recalls + 1e-8)
+    best_idx = np.argmax(f1_scores)
+    best_thresh = thresholds[best_idx]
+
+    y_pred_tuned = (y_proba >= best_thresh).astype(int)
+
+    print(f'\n{name} (threshold={best_thresh:.2f})')
+    print(f'  Accuracy : {accuracy_score(y_test, y_pred_tuned):.4f}')
+    print(f'  Precision: {precision_score(y_test, y_pred_tuned):.4f}')
+    print(f'  Recall   : {recall_score(y_test, y_pred_tuned):.4f}')
+    print(f'  F1 Score : {f1_score(y_test, y_pred_tuned):.4f}')
