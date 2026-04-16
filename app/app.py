@@ -1,3 +1,5 @@
+from scipy.stats import randint, uniform
+from sklearn.model_selection import RandomizedSearchCV, StratifiedKFold
 from sklearn.metrics import precision_recall_curve
 from imblearn.combine import SMOTEENN
 import time
@@ -267,3 +269,46 @@ for name, model in models.items():
     print(f'  Precision: {precision_score(y_test, y_pred_tuned):.4f}')
     print(f'  Recall   : {recall_score(y_test, y_pred_tuned):.4f}')
     print(f'  F1 Score : {f1_score(y_test, y_pred_tuned):.4f}')
+
+
+param_dist = {
+    'n_estimators':     randint(100, 400),
+    'max_depth':        randint(3, 9),
+    'learning_rate':    uniform(0.01, 0.2),
+    'subsample':        uniform(0.6, 0.4),
+    'colsample_bytree': uniform(0.6, 0.4),
+    'min_child_weight': randint(1, 10),
+    'gamma':            uniform(0, 0.5),
+}
+
+cv = StratifiedKFold(n_splits=5, shuffle=True, random_state=42)
+
+rand_search = RandomizedSearchCV(
+    estimator=XGBClassifier(random_state=42, use_label_encoder=False,
+                            eval_metric='logloss'),
+    param_distributions=param_dist,
+    n_iter=50,
+    cv=cv,
+    scoring='roc_auc',
+    n_jobs=-1,
+    random_state=42,
+    verbose=1
+)
+
+print('Running hyperparameter search (may take a few minutes)...')
+rand_search.fit(X_train_sm, y_train_sm)
+
+print('\nBest Parameters Found:')
+print(rand_search.best_params_)
+print(f'Best CV AUC-ROC: {rand_search.best_score_:.4f}')
+
+best_xgb = rand_search.best_estimator_
+
+y_pred_best = best_xgb.predict(X_test)
+y_proba_best = best_xgb.predict_proba(X_test)[:, 1]
+
+print(
+    f'\nTuned XGBoost Test AUC-ROC: {roc_auc_score(y_test, y_proba_best):.4f}')
+print(f'Tuned XGBoost Test F1:       {f1_score(y_test, y_pred_best):.4f}')
+print('\nFull Classification Report:')
+print(classification_report(y_test, y_pred_best))
