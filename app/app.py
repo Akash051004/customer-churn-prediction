@@ -1,3 +1,4 @@
+import joblib
 from scipy.stats import randint, uniform
 import shap
 from sklearn.model_selection import RandomizedSearchCV, StratifiedKFold
@@ -298,24 +299,25 @@ rand_search = RandomizedSearchCV(
 
 # print('Running hyperparameter search (may take a few minutes)...')
 rand_search.fit(X_train_sm, y_train_sm)
-'''
+
 print('\nBest Parameters Found:')
 print(rand_search.best_params_)
 print(f'Best CV AUC-ROC: {rand_search.best_score_:.4f}')
-'''
+
 best_xgb = rand_search.best_estimator_
 
 y_pred_best = best_xgb.predict(X_test)
 y_proba_best = best_xgb.predict_proba(X_test)[:, 1]
-'''
+
 print(
     f'\nTuned XGBoost Test AUC-ROC: {roc_auc_score(y_test, y_proba_best):.4f}')
 print(f'Tuned XGBoost Test F1:       {f1_score(y_test, y_pred_best):.4f}')
 print('\nFull Classification Report:')
 print(classification_report(y_test, y_pred_best))
-'''
+
 explainer = shap.TreeExplainer(best_xgb)
 shap_values = explainer.shap_values(X_test)
+
 plt.figure(figsize=(10, 8))
 shap.summary_plot(shap_values, X_test,
                   feature_names=X_test.columns.tolist(),
@@ -345,7 +347,21 @@ shap.plots.waterfall(
     ),
     show=False
 )
+'''
 plt.title(f'Why did Customer {customer_idx} Churn?')
 plt.tight_layout()
 plt.savefig('plots/shap_waterfall.png', dpi=150, bbox_inches='tight')
 plt.show()
+'''
+
+joblib.dump(best_xgb,  'models/best_xgb_model.pkl')
+joblib.dump(scaler,     'models/scaler.pkl')
+joblib.dump(X_test.columns.tolist(), 'models/feature_names.pkl')
+
+print('Model saved successfully!')
+
+loaded_model = joblib.load('models/best_xgb_model.pkl')
+loaded_scaler = joblib.load('models/scaler.pkl')
+
+test_pred = loaded_model.predict(X_test[:5])
+print('Test predictions from loaded model:', test_pred)
