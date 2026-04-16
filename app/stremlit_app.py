@@ -6,19 +6,15 @@ import shap
 import matplotlib.pyplot as plt
 import os
 
-# ── Page configuration ────────────────────────────────────
 st.set_page_config(
     page_title='Customer Churn Predictor',
     page_icon='📊',
     layout='wide'
 )
 
-# ── Load saved model and scaler ──────────────────────────
 
-
-@st.cache_resource  # cache so model loads only once
+@st.cache_resource
 def load_model():
-    # Get the directory of the current script
     script_dir = os.path.dirname(os.path.abspath(__file__))
     models_dir = os.path.join(script_dir, '../models')
 
@@ -30,12 +26,10 @@ def load_model():
 
 model, scaler, feature_names = load_model()
 
-# ── Title and description ─────────────────────────────────
 st.title('Customer Churn Prediction System')
 st.markdown('Enter customer details below to predict churn probability.')
 st.divider()
 
-# ── Input form — two columns ─────────────────────────────
 col1, col2, col3 = st.columns(3)
 
 with col1:
@@ -64,13 +58,9 @@ with col3:
     senior_citizen = st.selectbox('Senior Citizen', ['No', 'Yes'])
 
 st.divider()
-
-# ── Predict button ────────────────────────────────────────
 if st.button('Predict Churn Risk', type='primary'):
 
-    # Build input row matching the training feature columns
     input_data = {col: 0 for col in feature_names}
-    # Start with all zeros, then fill in the customer's values
 
     input_data['tenure'] = tenure
     input_data['MonthlyCharges'] = monthly_charges
@@ -81,19 +71,14 @@ if st.button('Predict Churn Risk', type='primary'):
     input_data['TechSupport'] = 1 if tech_support == 'Yes' else 0
     input_data['StreamingTV'] = 1 if streaming_tv == 'Yes' else 0
 
-    # One-hot encoding for contract
     if contract == 'One year':
         input_data['Contract_One year'] = 1
     if contract == 'Two year':
         input_data['Contract_Two year'] = 1
-
-    # One-hot encoding for internet service
     if internet_service == 'Fiber optic':
         input_data['InternetService_Fiber optic'] = 1
     elif internet_service == 'No':
         input_data['InternetService_No'] = 1
-
-    # Engineered features
     input_data['avg_monthly_spend'] = total_charges / (tenure + 1)
     input_data['is_new_customer'] = 1 if tenure <= 12 else 0
     input_data['num_services'] = sum([
@@ -102,17 +87,14 @@ if st.button('Predict Churn Risk', type='primary'):
         1 if streaming_tv == 'Yes' else 0
     ])
 
-    # Create DataFrame and scale numerical columns
     input_df = pd.DataFrame([input_data])
     scale_cols = ['tenure', 'MonthlyCharges',
                   'TotalCharges', 'avg_monthly_spend', 'num_services']
     input_df[scale_cols] = scaler.transform(input_df[scale_cols])
 
-    # Get prediction and probability
     churn_prob = model.predict_proba(input_df)[0][1]
     churn_pred = model.predict(input_df)[0]
 
-    # ── Display result ───────────────────────────────────
     st.subheader('Prediction Result')
     result_col1, result_col2 = st.columns(2)
 
@@ -127,8 +109,6 @@ if st.button('Predict Churn Risk', type='primary'):
     with result_col2:
         st.metric('Churn Probability', f'{churn_prob*100:.1f}%')
         st.progress(float(churn_prob))
-
-    # ── Business recommendation ──────────────────────────
     st.subheader('Recommended Actions')
     if churn_pred == 1:
         if contract == 'Month-to-month':
