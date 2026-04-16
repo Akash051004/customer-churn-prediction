@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ChurnSense — Customer Intelligence Platform</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link
+    href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap"
+    rel="stylesheet">
+  <link rel="stylesheet" href="style.css" />
+</head>
+
+<body>
+
+  <!-- Animated background -->
+  <div class="bg-orbs">
+    <div class="orb orb1"></div>
+    <div class="orb orb2"></div>
+    <div class="orb orb3"></div>
+  </div>
+
+  <!-- Header -->
+  <header class="header">
+    <div class="header-inner">
+      <div class="logo">
+        <div class="logo-icon">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+            <path d="M12 2L2 7l10 5 10-5-10-5z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round" />
+            <path d="M2 17l10 5 10-5" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round" />
+            <path d="M2 12l10 5 10-5" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round" />
+          </svg>
+        </div>
+        <div>
+          <span class="logo-name">ChurnSense</span>
+          <span class="logo-tag">AI Platform</span>
+        </div>
+      </div>
+      <div class="header-meta">
+        <div class="status-dot"></div>
+        <span>XGBoost Model v2 · Live</span>
+      </div>
+    </div>
+  </header>
+
+  <!-- Hero -->
+  <section class="hero">
+    <div class="hero-label">Predictive Analytics</div>
+    <h1 class="hero-title">Will your customer<br><span class="gradient-text">stay or leave?</span></h1>
+    <p class="hero-sub">Feed in customer data and our tuned XGBoost model returns churn probability with actionable
+      retention strategies — in under a second.</p>
+  </section>
+
+  <!-- Main form -->
+  <main class="container">
+    <form id="churn-form" onsubmit="return false">
+
+      <!-- Stats bar -->
+      <div class="stats-bar">
+        <div class="stat-item">
+          <span class="stat-num">94.2%</span>
+          <span class="stat-label">AUC-ROC Score</span>
+        </div>
+        <div class="stat-divider"></div>
+        <div class="stat-item">
+          <span class="stat-num">XGBoost</span>
+          <span class="stat-label">Model Engine</span>
+        </div>
+        <div class="stat-divider"></div>
+        <div class="stat-item">
+          <span class="stat-num">SMOTE</span>
+          <span class="stat-label">Balanced Dataset</span>
+        </div>
+        <div class="stat-divider"></div>
+        <div class="stat-item">
+          <span class="stat-num">26</span>
+          <span class="stat-label">Features Used</span>
+        </div>
+      </div>
+
+      <!-- Form grid -->
+      <div class="form-grid">
+
+        <!-- Card 1: Account -->
+        <div class="glass-card" style="--delay:.05s">
+          <div class="card-header">
+            <div class="card-icon cyan">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="8" r="4" />
+                <path d="M4 20c0-4 3.6-7 8-7s8 3 8 7" />
+              </svg>
+            </div>
+            <h2>Account Info</h2>
+          </div>
+
+          <div class="field">
+            <label>Tenure <span class="unit">(months)</span></label>
+            <div class="slider-wrap">
+              <input type="range" id="tenure" min="0" max="72" value="12" class="slider"
+                oninput="document.getElementById('tenure-val').textContent=this.value; updateSliderFill(this)">
+              <div class="slider-labels">
+                <span>0</span>
+                <span id="tenure-val" class="slider-current">12</span>
+                <span>72</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="field">
+            <label>Contract Type</label>
+            <div class="select-wrap">
+              <select id="contract">
+                <option>Month-to-month</option>
+                <option>One year</option>
+                <option>Two year</option>
+              </select>
+              <svg class="select-arrow" viewBox="0 0 10 6">
+                <path d="M1 1l4 4 4-4" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linecap="round" />
+              </svg>
+            </div>
+          </div>
+
+          <div class="field">
+            <label>Payment Method</label>
+            <div class="select-wrap">
+              <select id="payment">
+                <option>Electronic check</option>
+                <option>Mailed check</option>
+                <option>Bank transfer (automatic)</option>
+                <option>Credit card (automatic)</option>
+              </select>
+              <svg class="select-arrow" viewBox="0 0 10 6">
+                <path d="M1 1l4 4 4-4" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linecap="round" />
+              </svg>
+            </div>
+          </div>
+
+          <div class="field row-2">
+            <div>
+              <label>Senior Citizen</label>
+              <div class="toggle-group" id="senior-group">
+                <button type="button" class="toggle-btn" data-val="No"
+                  onclick="setToggle('senior-group','No')">No</button>
+                <button type="button" class="toggle-btn active" data-val="Yes"
+                  onclick="setToggle('senior-group','Yes')">Yes</button>
+              </div>
+            </div>
+            <div>
+              <label>Paperless Billing</label>
+              <div class="toggle-group" id="paper-group">
+                <button type="button" class="toggle-btn active" data-val="Yes"
+                  onclick="setToggle('paper-group','Yes')">Yes</button>
+                <button type="button" class="toggle-btn" data-val="No"
+                  onclick="setToggle('paper-group','No')">No</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Card 2: Services -->
+        <div class="glass-card" style="--delay:.1s">
+          <div class="card-header">
+            <div class="card-icon purple">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <rect x="2" y="3" width="20" height="14" rx="2" />
+                <path d="M8 21h8M12 17v4" />
+              </svg>
+            </div>
+            <h2>Services</h2>
+          </div>
+
+          <div class="field">
+            <label>Internet Service</label>
+            <div class="select-wrap">
+              <select id="internet">
+                <option>DSL</option>
+                <option>Fiber optic</option>
+                <option>No</option>
+              </select>
+              <svg class="select-arrow" viewBox="0 0 10 6">
+                <path d="M1 1l4 4 4-4" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linecap="round" />
+              </svg>
+            </div>
+          </div>
+
+          <div class="services-grid">
+            <div class="service-toggle" id="svc-security">
+              <div class="svc-icon">🔒</div>
+              <span>Online Security</span>
+              <div class="svc-switch" onclick="toggleService('svc-security')">
+                <div class="svc-knob"></div>
+              </div>
+            </div>
+            <div class="service-toggle active" id="svc-backup">
+              <div class="svc-icon">☁️</div>
+              <span>Online Backup</span>
+              <div class="svc-switch" onclick="toggleService('svc-backup')">
+                <div class="svc-knob"></div>
+              </div>
+            </div>
+            <div class="service-toggle" id="svc-device">
+              <div class="svc-icon">📱</div>
+              <span>Device Protection</span>
+              <div class="svc-switch" onclick="toggleService('svc-device')">
+                <div class="svc-knob"></div>
+              </div>
+            </div>
+            <div class="service-toggle active" id="svc-tech">
+              <div class="svc-icon">🛠️</div>
+              <span>Tech Support</span>
+              <div class="svc-switch" onclick="toggleService('svc-tech')">
+                <div class="svc-knob"></div>
+              </div>
+            </div>
+            <div class="service-toggle" id="svc-tv">
+              <div class="svc-icon">📺</div>
+              <span>Streaming TV</span>
+              <div class="svc-switch" onclick="toggleService('svc-tv')">
+                <div class="svc-knob"></div>
+              </div>
+            </div>
+            <div class="service-toggle" id="svc-movies">
+              <div class="svc-icon">🎬</div>
+              <span>Streaming Movies</span>
+              <div class="svc-switch" onclick="toggleService('svc-movies')">
+                <div class="svc-knob"></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="service-count-bar">
+            <span class="svc-count-label">Active services</span>
+            <div class="svc-dots" id="svc-dots">
+              <div class="dot active"></div>
+              <div class="dot active"></div>
+              <div class="dot"></div>
+              <div class="dot"></div>
+              <div class="dot"></div>
+              <div class="dot"></div>
+              <div class="dot"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Card 3: Billing -->
+        <div class="glass-card" style="--delay:.15s">
+          <div class="card-header">
+            <div class="card-icon amber">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <rect x="2" y="5" width="20" height="14" rx="2" />
+                <path d="M2 10h20" />
+              </svg>
+            </div>
+            <h2>Billing</h2>
+          </div>
+
+          <div class="field">
+            <label>Monthly Charges <span class="unit">(USD)</span></label>
+            <div class="money-input">
+              <span class="money-symbol">$</span>
+              <input type="number" id="monthly" value="65" min="20" max="120" step="0.01">
+            </div>
+            <div class="input-hint">Range: $20 – $120</div>
+          </div>
+
+          <div class="field">
+            <label>Total Charges <span class="unit">(USD)</span></label>
+            <div class="money-input">
+              <span class="money-symbol">$</span>
+              <input type="number" id="total" value="780" min="0" max="9000" step="0.01">
+            </div>
+            <div class="input-hint">Range: $0 – $9,000</div>
+          </div>
+
+          <div class="field">
+            <label>Avg Monthly Spend <span class="unit">(auto-calculated)</span></label>
+            <div class="calc-display" id="avg-spend">$65.00</div>
+          </div>
+
+          <div class="field">
+            <label>Customer Segment</label>
+            <div class="segment-bar" id="segment-bar">
+              <div class="seg-fill" id="seg-fill"></div>
+              <span class="seg-label" id="seg-label">Mid-tier</span>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Predict button -->
+      <div class="predict-wrap">
+        <button type="button" class="predict-btn" id="predict-btn" onclick="submitPrediction()">
+          <span class="btn-text">Analyze Customer</span>
+          <svg class="btn-arrow" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+            stroke-width="2">
+            <path d="M5 12h14M12 5l7 7-7 7" />
+          </svg>
+          <div class="btn-shimmer"></div>
+        </button>
+        <p class="predict-note">Powered by your trained XGBoost model</p>
+      </div>
+
+    </form>
+
+    <!-- Result panel -->
+    <div class="result-panel" id="result-panel">
+      <div class="result-inner">
+
+        <div class="result-top">
+          <div class="result-gauge-wrap">
+            <svg class="gauge-svg" viewBox="0 0 200 110">
+              <defs>
+                <linearGradient id="gauge-grad" x1="0%" y1="0%" x2="100%" y2="0%">
+                  <stop offset="0%" stop-color="#22d3ee" />
+                  <stop offset="50%" stop-color="#a855f7" />
+                  <stop offset="100%" stop-color="#f43f5e" />
+                </linearGradient>
+              </defs>
+              <!-- Track -->
+              <path d="M20 100 A80 80 0 0 1 180 100" fill="none" stroke="rgba(255,255,255,.08)" stroke-width="14"
+                stroke-linecap="round" />
+              <!-- Fill (animated by JS) -->
+              <path id="gauge-fill" d="M20 100 A80 80 0 0 1 180 100" fill="none" stroke="url(#gauge-grad)"
+                stroke-width="14" stroke-linecap="round" stroke-dasharray="251.2" stroke-dashoffset="251.2" />
+              <!-- Needle -->
+              <line id="gauge-needle" x1="100" y1="100" x2="100" y2="30" stroke="white" stroke-width="2"
+                stroke-linecap="round" transform-origin="100 100"
+                style="transform:rotate(-90deg);transition:transform .8s cubic-bezier(.34,1.56,.64,1)" />
+              <circle cx="100" cy="100" r="5" fill="white" />
+            </svg>
+            <div class="gauge-pct" id="gauge-pct">—</div>
+            <div class="gauge-label">Churn probability</div>
+          </div>
+
+          <div class="result-details">
+            <div class="verdict-badge" id="verdict-badge">
+              <div class="verdict-icon" id="verdict-icon"></div>
+              <div>
+                <div class="verdict-title" id="verdict-title">—</div>
+                <div class="verdict-sub" id="verdict-sub">—</div>
+              </div>
+            </div>
+
+            <div class="metrics-row">
+              <div class="metric-pill">
+                <span class="mp-label">Risk Level</span>
+                <span class="mp-val" id="risk-level">—</span>
+              </div>
+              <div class="metric-pill">
+                <span class="mp-label">Key Driver</span>
+                <span class="mp-val" id="key-driver">—</span>
+              </div>
+              <div class="metric-pill">
+                <span class="mp-label">Confidence</span>
+                <span class="mp-val" id="confidence">—</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Risk bar -->
+        <div class="risk-bar-wrap">
+          <div class="risk-zones">
+            <span>Safe</span><span>Moderate</span><span>High Risk</span>
+          </div>
+          <div class="risk-track">
+            <div class="risk-fill" id="risk-fill"></div>
+            <div class="risk-marker" id="risk-marker"></div>
+          </div>
+        </div>
+
+        <!-- Actions -->
+        <div class="actions-section" id="actions-section">
+          <h3 class="actions-title">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" />
+            </svg>
+            Retention Playbook
+          </h3>
+          <div class="actions-list" id="actions-list"></div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer">
+      <span>ChurnSense · Powered by XGBoost + SHAP</span>
+      <span>Built with Flask · Trained on Telco dataset</span>
+    </footer>
+
+  </main>
+
+  <script src="script.js"></script>
+</body>
+
+</html>
