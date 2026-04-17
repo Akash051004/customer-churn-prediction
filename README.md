@@ -369,23 +369,8 @@ Built-in XGBoost feature importance only tells you which features the model used
 
 > This project demonstrates a complete production ML workflow — from raw data to a deployed web application with model explainability. The tuned XGBoost model achieves **0.99 AUC on cross-validation** and flags **80% of actual churners** on held-out data, making it a viable tool for real telecom retention campaigns.
 
----
 
-## 👤 Author
 
-**[Your Name]**
-
-[![LinkedIn](https://img.shields.io/badge/LinkedIn-Connect-0A66C2?style=flat-square&logo=linkedin)](https://linkedin.com/in/yourprofile)
-[![GitHub](https://img.shields.io/badge/GitHub-Follow-181717?style=flat-square&logo=github)](https://github.com/yourusername)
-[![Email](https://img.shields.io/badge/Email-Contact-EA4335?style=flat-square&logo=gmail)](mailto:your@email.com)
-
----
-
-## 📄 License
-
-This project is licensed under the MIT License — see the [LICENSE](LICENSE) file for details.
-
----
 
 <div align="center">
 
