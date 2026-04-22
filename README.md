@@ -1,5 +1,5 @@
 ---
-title: Customer Churn Prediction
+title: Customer Churn Model
 emoji: 📊
 colorFrom: blue
 colorTo: green

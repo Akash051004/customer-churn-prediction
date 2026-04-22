@@ -19,7 +19,7 @@ CORS(app)
 
 # ── Load models ───────────────────────────────────────────────
 # Go up one level to project root
-BASE_DIR = os.path.dirname(CURR_DIR)
+BASE_DIR = CURR_DIR
 MODELS_DIR = os.path.join(BASE_DIR, 'models')
 
 try:
@@ -154,5 +154,5 @@ def health():
 # ── Run ────────────────────────────────────────────────────────
 if __name__ == '__main__':
     print("\n🚀  ChurnSense server starting...")
-    print("    Open http://localhost:5000 in your browser\n")
-    app.run(debug=True, port=5000, host='0.0.0.0')
+    print("    Open http://localhost:7860 in your browser\n")
+    app.run(debug=False, port=7860, host='0.0.0.0')
