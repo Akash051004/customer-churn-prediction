@@ -1,3 +1,16 @@
+---
+title: Customer Churn Prediction
+emoji: 📊
+colorFrom: blue
+colorTo: green
+sdk: docker
+app_port: 7860
+pinned: false
+---
+
+# Customer Churn Prediction
+A machine learning app to predict customer churn.
+
 # 🔮 ChurnSense — Customer Churn Prediction System
 
 <div align="center">
